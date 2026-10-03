@@ -39,11 +39,22 @@ export function createSpeechEngine(): SpeechEngine {
         };
 
         u.onend = () => { playing = false; resolve(); };
-        u.onerror = (e) => { playing = false; reject(new Error(e.error)); };
+        u.onerror = (e) => {
+          playing = false;
+          // "interrupted" is normal when cancel() or speak() again
+          if (e.error === 'interrupted' || e.error === 'canceled') {
+            resolve();
+          } else {
+            reject(new Error(e.error));
+          }
+        };
 
         playing = true;
         currentUtterance = u;
         synth.speak(u);
+
+        // Safety: some browsers (Chrome) fail to fire onend after long utterances
+        setTimeout(() => { if (playing) { playing = false; resolve(); } }, 30_000);
       });
     },
 
