@@ -1,7 +1,8 @@
 // ---- PhraseCard ----
 export interface PhraseCard {
   id: string;
-  english: string;
+  english: string;       // template: "Hi, I'm ___. I work in ___."
+  example?: string;      // concrete: "Hi, I'm Tom. I work in marketing."
   meaning?: string;
   tags: string[];
   scenario?: 'daily' | 'small-talk' | 'business' | 'repair';
@@ -11,6 +12,8 @@ export interface PhraseCard {
   nextReviewAt: string;
   lastScore?: number;
   reviewCount: number;
+  /** Custom phrases only — no AI needed */
+  isCustom?: boolean;
 }
 
 // ---- Voice ----
@@ -48,7 +51,7 @@ export interface PracticeSession {
   id: string;
   startedAt: string;
   endedAt?: string;
-  mode: 'quick' | 'review' | 'custom';
+  mode: 'quick' | 'review' | 'custom' | 'ai';
   topicPackId?: string;
   phrasesPracticed: number;
   corrections: number;
@@ -63,6 +66,68 @@ export interface ReviewEntry {
   interval: number; // days
   easeFactor: number;
   repetitions: number;
+}
+
+// ---- AI Types ----
+export type AiProviderId = 'mimo' | 'openai' | 'anthropic' | 'gemini' | 'custom';
+
+export interface AiProviderConfig {
+  id: AiProviderId;
+  label: string;
+  baseUrl: string;
+  model: string;
+  authScheme: 'bearer' | 'api-key';
+  tokenMode: 'memory' | 'session' | 'device-encrypted';
+  supportsStreaming: boolean;
+  maxOutputTokens: number;
+  requestTimeoutMs: number;
+  enabled: boolean;
+}
+
+export interface NormalizedChatRequest {
+  system?: string;
+  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+  responseFormat?: 'text' | 'json';
+  temperature?: number;
+  maxOutputTokens?: number;
+  stream?: boolean;
+  metadata?: { feature: string; locale: string; targetLevel: string };
+}
+
+export interface NormalizedChatResponse {
+  text: string;
+  provider: AiProviderId;
+  model: string;
+  usage?: { inputTokens?: number; outputTokens?: number };
+  finishReason?: string;
+}
+
+export interface AiProvider {
+  id: AiProviderId;
+  validateConfig(config: AiProviderConfig): Promise<{ ok: boolean; message: string }>;
+  chat(request: NormalizedChatRequest, config: AiProviderConfig, token: string): Promise<NormalizedChatResponse>;
+  healthCheck(config: AiProviderConfig, token: string): Promise<{ ok: boolean; message: string }>;
+}
+
+export type ProviderErrorCode =
+  | 'invalid-token' | 'forbidden' | 'invalid-model' | 'invalid-endpoint'
+  | 'content-filtered' | 'insufficient-balance' | 'rate-limited'
+  | 'cors-blocked' | 'timeout' | 'network' | 'unsupported-format' | 'unknown';
+
+// ---- AI Coach Reply ----
+export interface CoachReply {
+  reply: string;
+  nextQuestion: string;
+  corrections: string[];
+  usefulPhrases: string[];
+  shouldContinue: boolean;
+}
+
+export interface PhraseVariants {
+  natural: string;
+  simple: string;
+  formal: string;
+  alternatives: string[];
 }
 
 // ---- App State ----

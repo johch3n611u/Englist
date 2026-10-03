@@ -17,7 +17,9 @@ export function renderHomeView(container: HTMLElement) {
       <div class="home-actions">
         <button class="btn btn-primary btn-big" id="btn-quick">⚡ 開始 90 秒</button>
         <button class="btn btn-secondary btn-big" id="btn-review">📝 今天複習</button>
+        <button class="btn btn-secondary btn-big" id="btn-ai">🤖 AI 對話</button>
         <button class="btn btn-secondary btn-big" id="btn-phrases">📖 新增一句話</button>
+        <button class="btn btn-secondary btn-big" id="btn-stats">📊 統計</button>
         <button class="btn btn-secondary btn-big" id="btn-settings">⚙️ 設定</button>
       </div>
     </div>
@@ -25,7 +27,9 @@ export function renderHomeView(container: HTMLElement) {
 
   document.getElementById('btn-quick')!.onclick = () => { window.location.hash = '#/practice'; };
   document.getElementById('btn-review')!.onclick = () => { window.location.hash = '#/review'; };
+  document.getElementById('btn-ai')!.onclick = () => { window.location.hash = '#/ai'; };
   document.getElementById('btn-phrases')!.onclick = () => { window.location.hash = '#/phrases'; };
+  document.getElementById('btn-stats')!.onclick = () => { window.location.hash = '#/stats'; };
   document.getElementById('btn-settings')!.onclick = () => { window.location.hash = '#/settings'; };
 }
 
@@ -174,10 +178,11 @@ export async function renderReviewView(container: HTMLElement) {
       return;
     }
     const p = due[idx];
+    const display = p.example || p.english;
     container.innerHTML = `
       <div class="review-card">
         <div class="review-header">${idx + 1} / ${due.length}</div>
-        <div class="phrase-display">${p.english}</div>
+        <div class="phrase-display">${display}</div>
         <div class="phrase-meaning" id="meaning" style="display:none">${p.meaning ?? ''}</div>
         <div class="review-actions">
           <button class="btn btn-primary" id="btn-listen">🔊 聽</button>
@@ -189,8 +194,8 @@ export async function renderReviewView(container: HTMLElement) {
         <button class="btn btn-back" id="btn-back">← 返回</button>
       </div>
     `;
-    engine.speak(p.english, voiceSettings);
-    document.getElementById('btn-listen')!.onclick = () => engine.speak(p.english, voiceSettings);
+    engine.speak(display, voiceSettings);
+    document.getElementById('btn-listen')!.onclick = () => engine.speak(display, voiceSettings);
     document.getElementById('btn-show')!.onclick = () => { document.getElementById('meaning')!.style.display = 'block'; };
     document.getElementById('btn-back')!.onclick = () => { window.location.hash = '#/home'; };
     for (const btn of container.querySelectorAll('.btn-rate')) {
@@ -221,7 +226,8 @@ export async function renderPhrasesView(container: HTMLElement) {
           ${phrases.length === 0 ? '<p class="empty-hint">還沒有句子，按「新增」開始。</p>' : ''}
           ${phrases.map((p: any) => `
             <div class="phrase-card" data-id="${p.id}">
-              <div class="phrase-en">${p.english}</div>
+              <div class="phrase-en">${p.example || p.english}</div>
+              ${p.example && p.english.includes('___') ? `<div class="hint-template">句型：${p.english}</div>` : ''}
               <div class="phrase-cn">${p.meaning ?? ''}</div>
               <div class="phrase-meta">
                 <span class="tag">${p.scenario ?? 'custom'}</span>
@@ -254,7 +260,7 @@ export async function renderPhrasesView(container: HTMLElement) {
         const { createSpeechEngine } = await import('../audio/speech-engine');
         const engine = createSpeechEngine();
         const p = phrases.find((x: any) => x.id === (btn as HTMLElement).dataset.id);
-        if (p) engine.speak(p.english);
+        if (p) engine.speak(p.example || p.english);
       });
     }
   }
@@ -337,10 +343,30 @@ export async function renderSettingsView(container: HTMLElement) {
         <button class="btn btn-secondary" id="btn-clear-cache">清除 AI 快取</button>
       </section>
 
-      <section class="settings-section">
-        <h3>🤖 AI 功能</h3>
-        <p class="hint">需要設定 AI token 才能使用進階功能（句子變體、AI 對話等）。</p>
-        <button class="btn btn-secondary" disabled>設定 AI token（即將推出）</button>
+      <section class="token-setup">
+        <h3>🤖 AI 設定</h3>
+        <label>方案
+          <select id="ai-plan">
+            <option value="payg">按量付費（Pay-as-you-go）</option>
+            <option value="token-plan">Token Plan（訂閱制）</option>
+          </select>
+        </label>
+        <label>模型
+          <select id="ai-model">
+            <option value="mimo-v2.6-flash">mimo-v2.6-flash（快速）</option>
+            <option value="mimo-v2.6-pro">mimo-v2.6-pro（較強）</option>
+          </select>
+        </label>
+        <label>AI Token
+          <input type="password" id="ai-token" placeholder="sk-xxxx 或 tp-xxxx" />
+        </label>
+        <p class="hint">Token 只保存在瀏覽器，不會上傳到任何地方。換設備需要重新輸入。</p>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary" id="btn-save-token">儲存</button>
+          <button class="btn btn-secondary" id="btn-test-token">測試連線</button>
+          <button class="btn btn-secondary" id="btn-clear-token">清除</button>
+        </div>
+        <div id="token-status" class="hint" style="margin-top:8px"></div>
       </section>
 
       <button class="btn btn-back" id="btn-back">← 返回首頁</button>
@@ -391,5 +417,56 @@ export async function renderSettingsView(container: HTMLElement) {
     a.download = `englist-export-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // AI token setup
+  const { storeToken, clearToken, hasToken } = await import('../storage/token-vault');
+  const { saveAiConfig, testAiConnection } = await import('../ai/gateway');
+
+  const tokenInput = document.getElementById('ai-token') as HTMLInputElement;
+  const tokenStatus = document.getElementById('token-status')!;
+  const planSelect = document.getElementById('ai-plan') as HTMLSelectElement;
+  const modelSelect = document.getElementById('ai-model') as HTMLSelectElement;
+
+  // Pre-fill if token exists
+  if (hasToken()) {
+    tokenStatus.textContent = '✅ 已設定 token（顯示不回填）';
+  }
+
+  document.getElementById('btn-save-token')!.onclick = async () => {
+    const token = tokenInput.value.trim();
+    if (!token) { tokenStatus.textContent = '請輸入 token'; return; }
+
+    // Update config based on plan
+    const baseUrl = planSelect.value === 'token-plan'
+      ? 'https://token-plan-cn.xiaomimimo.com/v1'
+      : 'https://api.xiaomimimo.com/v1';
+    saveAiConfig({ baseUrl, model: modelSelect.value });
+
+    await storeToken(token, 'session');
+    tokenInput.value = '';
+    tokenStatus.textContent = '✅ token 已儲存（僅在本次分頁有效）';
+  };
+
+  document.getElementById('btn-test-token')!.onclick = async () => {
+    const token = tokenInput.value.trim();
+    if (!token) { tokenStatus.textContent = '請先輸入 token'; return; }
+
+    tokenStatus.textContent = '測試中...';
+    const baseUrl = planSelect.value === 'token-plan'
+      ? 'https://token-plan-cn.xiaomimimo.com/v1'
+      : 'https://api.xiaomimimo.com/v1';
+    saveAiConfig({ baseUrl, model: modelSelect.value });
+    await storeToken(token, 'session');
+
+    const result = await testAiConnection();
+    tokenStatus.textContent = result.ok ? '✅ 連線正常' : `❌ ${result.message}`;
+    if (result.ok) tokenInput.value = '';
+  };
+
+  document.getElementById('btn-clear-token')!.onclick = async () => {
+    await clearToken();
+    tokenInput.value = '';
+    tokenStatus.textContent = '已清除 token';
   };
 }

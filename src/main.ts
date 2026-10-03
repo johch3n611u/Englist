@@ -5,6 +5,8 @@ import { getPref, setPref } from './storage/local-preferences';
 import { openDB } from './storage/indexeddb';
 import { seedTopicPacksIfNeeded } from './content/topic-packs';
 import { renderHomeView, renderPracticeView, renderReviewView, renderPhrasesView, renderSettingsView } from './views';
+import { renderAiView } from './views/AiView';
+import { renderStatsView } from './views/StatsView';
 
 const VERSION = '0.1.0';
 
@@ -48,6 +50,8 @@ async function main() {
     review: renderReviewView,
     phrases: renderPhrasesView,
     settings: renderSettingsView,
+    ai: renderAiView,
+    stats: renderStatsView,
   }, app);
 
   // Show offline banner if needed

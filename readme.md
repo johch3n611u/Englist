@@ -1,6 +1,6 @@
 ﻿# B2 英語口說／聽力 PWA 製作 TODO
 
-- 狀態：**第一版已實作**（v0.1.0，無 token 模式完整可跑，AI 功能待加入）
+- 狀態：**v0.2.0** — 無 token 模式完整 + MiMo AI 對話 + 統計
 - 建立時間：2026-10-02 13:41（Asia/Shanghai）
 - 目標檔案：`F:\30590\SelfWork\Englist\readme.md`
 
@@ -160,15 +160,15 @@ englist-pwa/
 
 - [x] 開始 90 秒。
 - [x] 今天複習。
-- [ ] 開始對話。（需要 AI token）
+- [x] 開始對話。（AI 對話已實作，需 token）
 - [x] 新增一句話。
 
 快速練習：
 
 - [x] 播放一句英文。
 - [x] 使用者回答。（文字輸入）
-- [ ] AI 回答並追問。（需要 AI token）
-- [ ] 顯示最多三個修正。（需要 AI token）
+- [x] AI 回答並追問。（MiMo provider 已接）
+- [x] 顯示最多三個修正。
 - [x] 使用者重講。
 - [x] 計算完成時間、回答次數、追問次數與卡住次數。
 - [x] 提供「給我提示」、「換簡單一點」、「再說一次」、「顯示中文」。
@@ -177,7 +177,7 @@ englist-pwa/
 
 - [x] 一次點擊後 5 秒內進入練習。
 - [x] 90 秒內至少完成一輪問答與重講。
-- [ ] AI 不會只回覆而不追問。（需要 AI token）
+- [x] AI 不會只回覆而不追問。
 
 ## TODO 3：small talk 情境
 
@@ -454,13 +454,13 @@ export interface CoachReply {
 
 規則：
 
-- [ ] 每回合最多三個修正。
-- [ ] 優先修正造成誤解的錯誤。
-- [ ] 一定要提出下一個問題。
-- [ ] 不要把所有錯誤改成母語者等級。
-- [ ] 先保持對話，再提供修正。
-- [ ] 沒有 token 時顯示一般練習模式。
-- [ ] 網路錯誤時保留目前練習狀態。
+- [x] 每回合最多三個修正。
+- [x] 優先修正造成誤解的錯誤。
+- [x] 一定要提出下一個問題。
+- [x] 不要把所有錯誤改成母語者等級。
+- [x] 先保持對話，再提供修正。
+- [x] 沒有 token 時顯示一般練習模式。
+- [x] 網路錯誤時保留目前練習狀態。
 
 ## TODO 13：新手友善 UX
 
@@ -488,15 +488,15 @@ export interface CoachReply {
 
 只追蹤與口語實用性相關的指標：
 
-- [ ] 今日練習分鐘數。
-- [ ] 連續對話最長時間。
-- [ ] 主動追問次數。
-- [ ] 成功使用修復句次數。
-- [ ] 聽懂主旨比例。
-- [ ] 平均回答延遲。
-- [ ] 重複錯誤句。
-- [ ] business 情境完成數。
-- [ ] small talk 情境完成數。
+- [x] 今日練習分鐘數。
+- [ ] 連續對話最長時間。（需 AI 對話記錄）
+- [ ] 主動追問次數。（需 AI 對話記錄）
+- [ ] 成功使用修復句次數。（需修復句追蹤）
+- [ ] 聽懂主旨比例。（需理解度評分）
+- [ ] 平均回答延遲。（部分：練習計時已實作）
+- [ ] 重複錯誤句。（需錯誤追蹤）
+- [x] business 情境完成數。
+- [x] small talk 情境完成數。
 
 不把「錯誤數越少」作為唯一進步標準。
 
@@ -586,14 +586,14 @@ export interface CoachReply {
 2. [x] IndexedDB 與句子資料模型。
 3. [x] 首頁與 90 秒快速練習。
 4. [x] 自訂句子與複習佇列。
-5. [ ] small talk 與 business talk 情境。
-6. [ ] AI client 與固定 JSON schema。
-7. [ ] token vault。
+5. [x] small talk 與 business talk 情境。（內建3個 TopicPack）
+6. [x] AI client 與固定 JSON schema。（MiMo provider + CoachReply JSON）
+7. [x] token vault。（sessionStorage 記憶體模式）
 8. [x] 語音輸入、播放與權限引導。（播放已實作，語音輸入待加入）
 9. [x] Service Worker 離線能力。（vite-plugin-pwa 自動生成）
 10. [ ] 加密匯出／匯入。（明文 JSON 匯出已實作）
 11. [ ] 錯誤處理、無障礙與安全測試。
-12. [ ] GitHub Pages production 部署。
+12. [x] GitHub Pages production 部署。
 
 ## 證據與來源
 

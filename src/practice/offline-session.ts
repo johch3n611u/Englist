@@ -40,6 +40,8 @@ export function createOfflineSession(
   function render() {
     const phrase = phrases[currentIndex];
     if (!phrase || timeLeft <= 0) { finish(); return; }
+    const display = phrase.example || phrase.english;
+    const hasTemplate = phrase.english.includes('___');
 
     container.innerHTML = `
       <div class="practice-session">
@@ -47,8 +49,9 @@ export function createOfflineSession(
           <div class="timer" id="timer">${timeLeft}s</div>
           <div class="progress">${currentIndex + 1} / ${phrases.length}</div>
         </div>
-        <div class="phrase-display" id="phrase-text">${phrase.english}</div>
+        <div class="phrase-display" id="phrase-text">${display}</div>
         <div class="phrase-meaning">${phrase.meaning ?? ''}</div>
+        ${hasTemplate ? '<div class="phrase-hint">💡 練習時把內容換成你自己的</div>' : ''}
         <div class="practice-actions">
           <button class="btn btn-primary" id="btn-listen">🔊 再聽一次</button>
           <button class="btn btn-primary" id="btn-speak">✅ 我講完了</button>
@@ -56,7 +59,8 @@ export function createOfflineSession(
         </div>
         <div class="practice-hint" id="hint-area" style="display:none">
           <div class="hint-label">示範答案：</div>
-          <div class="hint-text">${phrase.english}</div>
+          <div class="hint-text">${display}</div>
+          ${hasTemplate ? `<div class="hint-template">句型：${phrase.english}</div>` : ''}
         </div>
         <div class="rating-area" id="rating-area" style="display:none">
           <div class="rating-label">你覺得這句：</div>
@@ -68,11 +72,11 @@ export function createOfflineSession(
     `;
 
     // Auto-play
-    engine.speak(phrase.english, voiceSettings);
+    engine.speak(display, voiceSettings);
 
     // Events
     document.getElementById('btn-listen')!.onclick = () => {
-      engine.speak(phrase.english, voiceSettings);
+      engine.speak(display, voiceSettings);
     };
     document.getElementById('btn-speak')!.onclick = () => {
       document.getElementById('hint-area')!.style.display = 'block';
