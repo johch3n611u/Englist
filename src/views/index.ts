@@ -17,6 +17,8 @@ export function renderHomeView(container: HTMLElement) {
       <div class="home-actions">
         <button class="btn btn-primary btn-big" id="btn-quick">⚡ 開始 90 秒</button>
         <button class="btn btn-secondary btn-big" id="btn-review">📝 今天複習</button>
+        <button class="btn btn-secondary btn-big" id="btn-quiz">✏️ 測驗</button>
+        <button class="btn btn-secondary btn-big" id="btn-scenario">🎯 情境任務</button>
         <button class="btn btn-secondary btn-big" id="btn-ai">🤖 AI 對話</button>
         <button class="btn btn-secondary btn-big" id="btn-phrases">📖 新增一句話</button>
         <button class="btn btn-secondary btn-big" id="btn-stats">📊 統計</button>
@@ -27,6 +29,8 @@ export function renderHomeView(container: HTMLElement) {
 
   document.getElementById('btn-quick')!.onclick = () => { window.location.hash = '#/practice'; };
   document.getElementById('btn-review')!.onclick = () => { window.location.hash = '#/review'; };
+  document.getElementById('btn-quiz')!.onclick = () => { window.location.hash = '#/quiz'; };
+  document.getElementById('btn-scenario')!.onclick = () => { window.location.hash = '#/scenario'; };
   document.getElementById('btn-ai')!.onclick = () => { window.location.hash = '#/ai'; };
   document.getElementById('btn-phrases')!.onclick = () => { window.location.hash = '#/phrases'; };
   document.getElementById('btn-stats')!.onclick = () => { window.location.hash = '#/stats'; };

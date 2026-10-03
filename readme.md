@@ -2354,3 +2354,91 @@ F2 要求「每個主題至少 20 句」× 17 主題 ×（中文意思＋可替�
 
 - 本次只補 TODO、架構判斷與優先順序，未撰寫任何 source code。
 - 本檔的 markdown 跳脫字元（反斜線加反引號、反斜線加右括號、反斜線加 `${`）已修正為正常 markdown，文字內容未改動；備份為 `readme.md.bak`。
+
+---
+
+# 補充 TODO：AI 結構化資料應用（v0.3.0）
+
+## 核心原則
+
+**AI 是資料產生器，不是聊天對象。** App 控制流程，AI 只產出結構化 JSON，App 拿這個 JSON 驅動下一步。使用者看到的是練習、測驗、情境任務，不是聊天視窗。
+
+## AR2. 弱點分析 + 針對性練習
+
+- [x] App 從 reviewQueue 取得評分為 hard 或到期的句子
+- [x] App 從 practiceSessions 取得最近練習紀錄
+- [x] 將資料 + 指定 JSON schema 傳給 AI
+- [x] AI 回傳 `WeaknessAnalysis`：弱點句子、弱點模式、建議主題
+- [ ] 首頁顯示「🎯 今日弱點」卡片（改為情境任務入口）
+- [x] 點擊進入針對性練習（只練弱點句子，不是隨機 10 句）
+- [x] 離線時用本地模板（顯示評分為 hard 的句子，不用 AI）
+
+## AR3. 填空測驗
+
+- [x] 從 phraseCards 選取句子（優先弱點句）
+- [x] AI 生成填空題（挖空關鍵字 + 答案 + 提示）
+- [x] 使用者輸入答案 → 本地比對或 AI 評分
+- [x] 答對加分 + 短期不再出現
+- [x] 答錯加權複習
+- [x] 離線時用模板挖空（固定挖數字/動詞位置）
+
+## AR4. 情境任務
+
+- [x] AI 從弱點句子生成情境（主管問延遲、客戶問進度等）
+- [x] 顯示情境卡：角色、場景、問題、期望關鍵句
+- [x] 使用者輸入回答
+- [x] AI 回傳 `Feedback`：正確性、分數、修正、下一題
+- [x] 顯示評分 + 修正 + 追問
+- [x] 連續 3 題完成後顯示小結
+
+## AR5. 結構化 AI schema
+
+```ts
+interface WeaknessAnalysis {
+  weakPhrases: string[];
+  pattern: string;
+  focusTopic: string;
+  suggestedScenario: string;
+}
+
+interface QuizQuestion {
+  type: 'fill-blank';
+  phraseId: string;
+  question: string;  // "I've been with the company for about ___ years."
+  answer: string;    // "three"
+  hint: string;
+}
+
+interface ScenarioTask {
+  scenario: string;
+  role: string;
+  question: string;
+  expectedKeyPhrases: string[];
+  successCriteria: string;
+}
+
+interface AiFeedback {
+  correct: boolean;
+  score: number;
+  corrections: string[];
+  nextQuestion: string;
+  improvementTip: string;
+}
+```
+
+## AR6. AI Gateway 新增方法
+
+- [x] `analyzeWeakness(reviews, sessions): Promise<WeaknessAnalysis>`
+- [x] `generateQuiz(phrases): Promise<QuizQuestion[]>`
+- [x] `generateScenario(weakPhrases): Promise<ScenarioTask>`
+- [x] `scoreResponse(userResponse, expectedPhrases): Promise<AiFeedback>`
+- [x] 每個方法：建 prompt + 指定 schema → aiChat → parseAiJson → 回傳型別
+
+## AR7. 測試
+
+- [x] 弱點分析正確讀取本地資料
+- [x] 填空題答案正確比對
+- [x] 情境任務可完成（輸入 → 評分 → 下一題）
+- [x] 離線時降級為本地模板
+- [x] AI 回應格式錯誤時 fallback 為純文字
+- [ ] token 不出現在 console 或 URL

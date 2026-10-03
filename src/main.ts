@@ -7,6 +7,8 @@ import { seedTopicPacksIfNeeded } from './content/topic-packs';
 import { renderHomeView, renderPracticeView, renderReviewView, renderPhrasesView, renderSettingsView } from './views';
 import { renderAiView } from './views/AiView';
 import { renderStatsView } from './views/StatsView';
+import { renderQuizView } from './views/QuizView';
+import { renderScenarioView } from './views/ScenarioView';
 
 const VERSION = '0.1.0';
 
@@ -52,6 +54,8 @@ async function main() {
     settings: renderSettingsView,
     ai: renderAiView,
     stats: renderStatsView,
+    quiz: renderQuizView,
+    scenario: renderScenarioView,
   }, app);
 
   // Show offline banner if needed
