@@ -1,0 +1,42 @@
+/* Focus styles */
+*:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Skip link (for screen readers) */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-sm) var(--space-md);
+  z-index: 1001;
+  transition: top 0.2s;
+}
+.skip-link:focus { top: 0; }
+
+/* Ensure buttons have accessible names */
+.btn[aria-label] { /* good practice */ }
+
+/* High contrast mode */
+@media (forced-colors: active) {
+  .btn { border: 2px solid ButtonText; }
+  .btn-primary { background: Highlight; color: HighlightText; }
+  .timer { color: Highlight; }
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

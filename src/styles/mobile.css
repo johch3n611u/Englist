@@ -1,0 +1,46 @@
+/* Mobile-first responsive styles */
+
+/* Small phones */
+@media (max-width: 360px) {
+  #app { padding: var(--space-sm); }
+  .btn-big { font-size: var(--font-size-base); min-height: 48px; }
+  .phrase-display { font-size: var(--font-size-lg); padding: var(--space-md); }
+  .stats-grid { gap: var(--space-sm); }
+}
+
+/* Touch-friendly: all interactive elements >= 44px */
+@media (pointer: coarse) {
+  .btn { min-height: 44px; min-width: 44px; }
+  .btn-sm { min-height: 40px; min-width: 40px; }
+  input, select { min-height: 44px; }
+}
+
+/* Landscape: reduce vertical spacing */
+@media (max-height: 500px) {
+  .home-view { padding-top: var(--space-md); }
+  .home-title { font-size: var(--font-size-xl); }
+  .practice-session { padding-top: var(--space-sm); }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1a1a1a;
+    --color-surface: #2d2d2d;
+    --color-text: #e8eaed;
+    --color-text-secondary: #9aa0a6;
+    --color-border: #3c4043;
+  }
+  .btn-primary { background: #8ab4f8; color: #1a1a1a; border-color: #8ab4f8; }
+  .btn-primary:hover { background: #aecbfa; }
+  .btn-option.selected { background: #1a3a5c; border-color: #8ab4f8; }
+  .tag { background: #1a3a5c; color: #8ab4f8; }
+  .practice-hint { background: #1a3a5c; }
+  .settings-section { background: #2d2d2d; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+  .btn:active { transform: none; }
+}
